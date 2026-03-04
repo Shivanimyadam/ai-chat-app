@@ -19,7 +19,7 @@ function Chat () {
 console.log("user types message -->",userMessage);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/chat',{
+            const res = await axios.post('http://localhost:5001/api/chat',{
                 message : text
             });
             console.log("res ---> axios",res);
