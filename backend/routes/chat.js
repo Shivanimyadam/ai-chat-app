@@ -10,23 +10,32 @@ const axios = require('axios');
 // - Gets the AI reply back
 // - Sends the reply to your frontend
 
-router.post('/', async(req,res) =>{
+router.post('/', async (req, res) => {
     const { message } = req.body;
     try {
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            'https://api.groq.com/openai/v1/chat/completions',
             {
-                contents: [{ parts: [{ text: message }]}]
+model: 'llama-3.3-70b-versatile',
+                messages: [{ role: 'user', content: message }]
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                    'Content-Type': 'application/json'
+                }
             }
         );
+console.log("Groq response:", JSON.stringify(response.data, null, 2));
+        const reply = response.data.choices[0].message.content;
+        res.json({ reply });
 
-        const reply = response.data.candidates[0].content.parts[0].text;
-    res.json({ reply });
-
-    }catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: 'Something went wrong' });
-  }
+    } catch (error) {
+        console.error(error.message);
+        console.error("Full error:", error.response?.data);
+        console.error("Status:", error.response?.status);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
 });
 
 module.exports = router;

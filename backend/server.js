@@ -7,13 +7,18 @@ require('dotenv').config();  // loads .env file
 
 const app = express();
 
+// app.use(cors({
+//     origin:'http://localhost:5173',
+//     methods:['GET','POST'],
+//     allowedHeaders:['Content-Type']
+// }));
 app.use(cors());
 app.use(express.json());
 
 const chatRoute = require('./routes/chat');
 app.use('/api/chat',chatRoute);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT,() => {
     console.log(`Server running on port ${PORT} `);
 });
