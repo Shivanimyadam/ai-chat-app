@@ -1,0 +1,126 @@
+/* .message-row {
+  display: flex;
+  gap: 16px;
+  padding: 16px 48px;
+  transition: background 0.2s;
+}
+
+.message-row:hover {
+  background-color: var(--bg-secondary);
+}
+
+.message-row.ai {
+  background-color: var(--bg-secondary);
+}
+
+.message-row.ai:hover {
+  background-color: var(--bg-secondary);
+}
+
+.message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background-color: var(--border-color);
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.message-role {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.message-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.message-row.user .message-text {
+  background-color: var(--bubble-user, transparent);
+  color: var(--bubble-user-text, var(--text-primary));
+  padding: 10px 14px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.message-row.ai .message-text {
+  background-color: var(--bubble-ai, transparent);
+  color: var(--bubble-ai-text, var(--text-primary));
+  padding: 10px 14px;
+  border-radius: 12px;
+} */
+
+.message-row {
+  display: flex;
+  gap: 12px;
+  padding: 12px 24px;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background-color: var(--border-color);
+  margin-top: 4px;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 75%;
+}
+
+.message-row.user {
+  flex-direction: row-reverse;
+}
+
+.message-row.user .message-content {
+  align-items: flex-end;
+}
+
+.message-role {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.message-text {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.message-row.user .message-text {
+  background-color: var(--bubble-user-bg);
+  color: var(--bubble-user-text);
+  border-bottom-right-radius: 4px;
+}
+
+.message-row.ai .message-text {
+  background-color: var(--bubble-ai-bg);
+  color: var(--bubble-ai-text);
+  border-bottom-left-radius: 4px;
+}

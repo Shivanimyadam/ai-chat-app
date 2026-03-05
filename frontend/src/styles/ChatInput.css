@@ -1,0 +1,68 @@
+.input-wrapper {
+  padding: 16px 48px 24px;
+  background-color: var(--bg-primary);
+}
+
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 12px 16px;
+  transition: border-color 0.2s;
+}
+
+.input-container:focus-within {
+  border-color: var(--button-bg);
+}
+
+.input-container textarea {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 15px;
+  resize: none;
+  max-height: 200px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.input-container textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.input-container button {
+  background-color: var(--button-bg);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.input-container button:hover:not(:disabled) {
+  background-color: var(--button-hover);
+}
+
+.input-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
