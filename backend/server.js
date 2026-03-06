@@ -16,7 +16,12 @@ app.use(cors());
 app.use(express.json());
 
 const chatRoute = require('./routes/chat');
+
+const authRoute = require('./routes/auth');
+
 app.use('/api/chat',chatRoute);
+
+app.use('/api/auth',authRoute);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT,() => {

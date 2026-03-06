@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const db = require('../db');
 
 
 // **`routes/chat.js`**
@@ -13,6 +14,10 @@ const axios = require('axios');
 router.post('/', async (req, res) => {
     const { message } = req.body;
     try {
+        // first save user messages to db
+        db.query(
+            'INSERT INTO messages (role,text) VALUES (?,?)',['user',message]
+        ); 
         const response = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
@@ -28,6 +33,10 @@ model: 'llama-3.3-70b-versatile',
         );
 console.log("Groq response:", JSON.stringify(response.data, null, 2));
         const reply = response.data.choices[0].message.content;
+        // save AI reply to db
+          db.query(
+            'INSERT INTO messages (role,text) VALUES (?,?)',['ai',reply]
+        ); 
         res.json({ reply });
 
     } catch (error) {
@@ -36,6 +45,18 @@ console.log("Groq response:", JSON.stringify(response.data, null, 2));
         console.error("Status:", error.response?.status);
         res.status(500).json({ error: 'Something went wrong' });
     }
+});
+
+// creating GET route - to load previous messages
+
+router.get('/',(req,res)=>{
+    db.query('SELECT * FROM messages ORDER BY created_at ASC',(err,results)=>{
+         if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+    res.json(results);
+    });
 });
 
 module.exports = router;
