@@ -7,12 +7,33 @@ import { useEffect } from "react";
 import './styles/Chat.css';
 
 
-function Chat ({theme, toggleTheme}) {
+function Chat ({theme, toggleTheme, user, onLogout}) {
 
     const [messages,setMessages] = useState([]);
     const [loading,setLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
+     // load messages on start
+    useEffect(()=>{
+        const loadMessages = async ()=>{
+            try {
+                const res = await axios.get('http://localhost:5001/api/chat',{
+                    headers :{
+                        Authorization : `Bearer ${user.token}`
+                    }
+                });
+                setMessages(res.data.map(msg=>({
+                    role : msg.role,
+                    text: msg.text
+                })));
+            } catch (error) {
+                        console.error('Failed to load messages:', error);
+            }
+        };
+        loadMessages()
+    },[]);
+
+    //AutoScroll
     useEffect(()=>{
         messagesEndRef.current?.scrollIntoView({behavior:'smooth'});
     },[messages]);
@@ -26,9 +47,13 @@ function Chat ({theme, toggleTheme}) {
 console.log("user types message -->",userMessage);
 
         try {
-            const res = await axios.post('http://localhost:5001/api/chat',{
-                message : text
-            });
+            const res = await axios.post('http://localhost:5001/api/chat',
+                { message : text},
+                {   headers :{
+                        Authorization : `Bearer ${user.token}`
+                    }
+            }
+        );
             console.log("res ---> axios",res);
             const aiMessage = { role: 'ai', text: res.data.reply };
             console.log("AI message --->",aiMessage);
@@ -54,9 +79,16 @@ console.log("user types message -->",userMessage);
         <div className="chat-wrapper">
             <div className="chat-header">
                 <h1>AI Chat</h1>
-                <button className="toggle-theme" onClick={toggleTheme}>
+                <div className="header-right">
+                        <span className="username">👤 {user.username}</span>
+<button className="toggle-theme" onClick={toggleTheme}>
                     {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
                 </button>
+                 <button className="logout-btn" onClick={onLogout}>
+      Logout
+    </button>
+                </div>
+                
             </div>
             <div className="chat-messages">
                 {messages.length === 0 && (
@@ -65,7 +97,7 @@ console.log("user types message -->",userMessage);
           </div>
                 )}
                 {messages.map((msg,index)=>(
-                    <ChatMessage key={index} message={msg}/>
+                    <ChatMessage key={index} message={msg} theme={theme} />
                 ))}
                 {loading && (
                 <div className="loading-dots">
