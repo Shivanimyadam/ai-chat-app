@@ -19,9 +19,13 @@ const chatRoute = require('./routes/chat');
 
 const authRoute = require('./routes/auth');
 
+const sessionsRoute = require('./routes/sessions');
+
 app.use('/api/chat',chatRoute);
 
 app.use('/api/auth',authRoute);
+
+app.use('/api/sessions',sessionsRoute);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT,() => {
