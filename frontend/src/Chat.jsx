@@ -5,111 +5,137 @@ import ChatMessage from "./components/ChatMessage";
 import { useRef } from "react";
 import { useEffect } from "react";
 import './styles/Chat.css';
+import Sidebar from "./components/Sidebar";
 
 
-function Chat ({theme, toggleTheme, user, onLogout}) {
+function Chat({ theme, toggleTheme, user, onLogout }) {
 
-    const [messages,setMessages] = useState([]);
-    const [loading,setLoading] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const [currentSession, setCurrentSession] = useState(null);
 
-     // load messages on start
-    useEffect(()=>{
-        const loadMessages = async ()=>{
+    const [refreshSidebar, setRefreshSidebar] = useState(0);
+
+// load messages on start
+    // useEffect(() => {
+    //     loadMessages()
+    // }, []);
+
+//AutoScroll
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+     const loadMessages = async (sessionId) => {
             try {
-                const res = await axios.get('http://localhost:5001/api/chat',{
-                    headers :{
-                        Authorization : `Bearer ${user.token}`
+                const res = await axios.get(`http://localhost:5001/api/chat?session_id=${sessionId}`, {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`
                     }
                 });
-                setMessages(res.data.map(msg=>({
-                    role : msg.role,
+                setMessages(res.data.map(msg => ({
+                    role: msg.role,
                     text: msg.text
                 })));
             } catch (error) {
-                        console.error('Failed to load messages:', error);
+                console.error('Failed to load messages:', error);
             }
         };
-        loadMessages()
-    },[]);
 
-    //AutoScroll
-    useEffect(()=>{
-        messagesEndRef.current?.scrollIntoView({behavior:'smooth'});
-    },[messages]);
+    // session related
+    useEffect(() => {
+        if (currentSession) loadMessages(currentSession.id);
+        else setMessages([]);
+    }, [currentSession]);
 
-    const handleSend = async(text) => {
 
-        const userMessage = { role:'user', text};
+    const handleSend = async (text) => {
+
+        if (!currentSession) return;
+
+        const userMessage = { role: 'user', text };
         setMessages(prev => [...prev, userMessage]);
         setLoading(true);
 
-console.log("user types message -->",userMessage);
+        console.log("user types message -->", userMessage);
 
         try {
             const res = await axios.post('http://localhost:5001/api/chat',
-                { message : text},
-                {   headers :{
-                        Authorization : `Bearer ${user.token}`
+                { message: text, session_id: currentSession.id },
+                {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`
                     }
-            }
-        );
-            console.log("res ---> axios",res);
+                }
+            );
+            console.log("res ---> axios", res);
             const aiMessage = { role: 'ai', text: res.data.reply };
-            console.log("AI message --->",aiMessage);
+            console.log("AI message --->", aiMessage);
             setMessages(prev => [...prev, aiMessage]);
-        } catch(error){
-            console.error("catched error -->",error);
-        } finally{
+            // In handleSend after getting reply:
+if (currentSession.title === 'New Chat') {
+  setCurrentSession(prev => ({ ...prev, title: text.slice(0, 30) }));
+  setRefreshSidebar(prev => prev + 1); // triggers sidebar reload
+}
+        } catch (error) {
+            console.error("catched error -->", error);
+        } finally {
             setLoading(false);
         }
     };
 
     return (
         <>
-        {/* <div className="chat-container">
-            <div className="chat-messages">
-                {messages.map((msg,index)=>(
-                    <ChatMessage key={index} message={msg}/>
-                ))}
-                {loading && <div className="loading">AI is thinking...</div>}
-            </div>
-            <ChatInput onSend={handleSend} loading={loading} />
-        </div> */}
-        <div className="chat-wrapper">
-            <div className="chat-header">
-                <h1>AI Chat</h1>
-                <div className="header-right">
-                        <span className="username">👤 {user.username}</span>
-<button className="toggle-theme" onClick={toggleTheme}>
-                    {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-                </button>
-                 <button className="logout-btn" onClick={onLogout}>
-      Logout
-    </button>
-                </div>
-                
-            </div>
-            <div className="chat-messages">
-                {messages.length === 0 && (
-                     <div className="empty-state">
-            <h2>How can I help you today?</h2>
-          </div>
-                )}
-                {messages.map((msg,index)=>(
-                    <ChatMessage key={index} message={msg} theme={theme} />
-                ))}
-                {loading && (
-                <div className="loading-dots">
-                                <span></span><span></span><span></span>
+            <div className="chat-layout">
+                <Sidebar
+                    user={user}
+                    currentSession={currentSession}
+                    onSelectSession={setCurrentSession}
+                    onNewChat={setCurrentSession}
+                      refreshSidebar={refreshSidebar}
+                />
+
+                <div className="chat-wrapper">
+                    <div className="chat-header">
+                        <h1>{currentSession ? currentSession.title : 'AI Chat'}</h1>
+                        <div className="header-right">
+                            <span className="username">👤 {user.username}</span>
+                            <button className="toggle-theme" onClick={toggleTheme}>
+                                {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+                            </button>
+                            <button className="logout-btn" onClick={onLogout}>
+                                Logout
+                            </button>
+                        </div>
+
                     </div>
-                )}
-                <div ref={messagesEndRef} />
+                    <div className="chat-messages">
+                        {/* {!currentSession && (
+                            <div className="empty-state">
+                                <h2>Select or create a new chat! 👈</h2>
+                            </div>
+                        )} */}
+                        {currentSession && messages.length === 0 && (
+                            <div className="empty-state">
+                                <h2>How can I help you today?</h2>
+                            </div>
+                        )}
+                        {messages.map((msg, index) => (
+                            <ChatMessage key={index} message={msg} theme={theme} />
+                        ))}
+                        {loading && (
+                            <div className="loading-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+                    <ChatInput onSend={handleSend} loading={loading || !currentSession} />
+                </div>
             </div>
-            <ChatInput onSend={handleSend} loading={loading} />
-        </div>
         </>
     );
-} 
+}
 
 export default Chat;
