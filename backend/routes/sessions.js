@@ -53,12 +53,13 @@ router.post('/', verifyToken, (req, res) => {
 
 router.delete('/:id', verifyToken, (req, res) => {
     const sessionId = req.params.id;
-
+    console.log("============\n////////////");
+console.log("delete function backend ",sessionId);
     db.query('DELETE FROM messages WHERE session_id = ?  ',
         [sessionId],
         (error) => {
             if (error) return res.status(500).json({ error: 'Failed to delete messages' });
-            db.query('DELETE FROM sessions where session_id=? AND user_id=?',
+            db.query('DELETE FROM sessions where id=? AND user_id=?',
                 [sessionId, req.user.id],
                 (error) => {
                     if (error) return res.status(500).json({ error: 'Failed to delete session' });
