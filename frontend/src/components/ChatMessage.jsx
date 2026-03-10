@@ -3,9 +3,20 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import '../styles/ChatMessage.css';
+import { useState } from 'react';
 
-function ChatMessage({ message,theme }) {
+function ChatMessage({ message, theme }) {
     console.log("message in chat msg component-->", message);
+
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        console.log("message in handlecopy", message);
+        navigator.clipboard.writeText(message.text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
         <>
             <div className={`message-row ${message.role}`}>
@@ -39,6 +50,9 @@ function ChatMessage({ message,theme }) {
                             }}
                         >{message.text}</ReactMarkdown>
                     </div>
+                    <button className="copy-btn" onClick={handleCopy}>
+                        {copied ? '✅ Copied!' : '📋 Copy'}
+                    </button>
                 </div>
             </div>
         </>

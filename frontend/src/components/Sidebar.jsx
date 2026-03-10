@@ -48,6 +48,7 @@ function Sidebar({ user, currentSession, onSelectSession, onNewChat , refreshSid
 
      const handleDelete = async (e, sessionId) => {
     e.stopPropagation();
+    console.log( `http://localhost:5001/api/sessions/${sessionId}`);
     try {
       await axios.delete(`http://localhost:5001/api/sessions/${sessionId}`, {
         headers: { Authorization: `Bearer ${user.token}` }
