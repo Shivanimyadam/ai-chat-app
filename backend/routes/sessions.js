@@ -54,7 +54,7 @@ router.post('/', verifyToken, (req, res) => {
 router.delete('/:id', verifyToken, (req, res) => {
     const sessionId = req.params.id;
     console.log("============\n////////////");
-console.log("delete function backend ",sessionId);
+    console.log("delete function backend ", sessionId);
     db.query('DELETE FROM messages WHERE session_id = ?  ',
         [sessionId],
         (error) => {
@@ -79,6 +79,20 @@ router.put('/:id', (req, res) => {
         (error) => {
             if (err) return res.status(500).json({ error: 'Failed to update session' });
             res.json({ message: 'Session updated' });
+        }
+    );
+});
+
+
+// Clear messages in a session
+router.delete('/:id/messages', verifyToken, (req, res) => {
+    const sessionId = req.params.id;
+    db.query(
+        'DELETE FROM messages WHERE session_id = ? AND user_id = ?',
+        [sessionId, req.user.id],
+        (err) => {
+            if (err) return res.status(500).json({ error: 'Failed to clear messages' });
+            res.json({ message: 'Messages cleared' });
         }
     );
 });
