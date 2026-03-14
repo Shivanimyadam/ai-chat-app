@@ -5,20 +5,32 @@ import './App.css'
 import Chat from './Chat'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Auth from './pages/Auth'
+import { useEffect } from 'react'
 
 function App() {
 
-  const [theme, setTheme] = useState('dark');
+  // const [theme, setTheme] = useState('dark');
+
+    const [theme, setTheme] = useState(()=>{
+      return localStorage.getItem('theme') || 'dark';
+    });
+
+
   const [user, setUser] = useState(()=>{
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
     return token ? {token, username} : null;
   });
 
+  useEffect(()=>{
+    document.documentElement.setAttribute('data-theme',theme);
+  },[]);
+
   console.log("in app.jsx theme", theme);
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
+    localStorage.setItem('theme',newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
     console.log("in toggle theme NEW THEME", newTheme);
   };

@@ -17,31 +17,26 @@ function Chat({ theme, toggleTheme, user, onLogout }) {
 
     const [refreshSidebar, setRefreshSidebar] = useState(0);
 
-// load messages on start
-    // useEffect(() => {
-    //     loadMessages()
-    // }, []);
-
-//AutoScroll
+    //AutoScroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-     const loadMessages = async (sessionId) => {
-            try {
-                const res = await axios.get(`http://localhost:5001/api/chat?session_id=${sessionId}`, {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`
-                    }
-                });
-                setMessages(res.data.map(msg => ({
-                    role: msg.role,
-                    text: msg.text
-                })));
-            } catch (error) {
-                console.error('Failed to load messages:', error);
-            }
-        };
+    const loadMessages = async (sessionId) => {
+        try {
+            const res = await axios.get(`http://localhost:5001/api/chat?session_id=${sessionId}`, {
+                headers: {
+                    Authorization: `Bearer ${user.token}`
+                }
+            });
+            setMessages(res.data.map(msg => ({
+                role: msg.role,
+                text: msg.text
+            })));
+        } catch (error) {
+            console.error('Failed to load messages:', error);
+        }
+    };
 
     // session related
     useEffect(() => {
@@ -74,14 +69,30 @@ function Chat({ theme, toggleTheme, user, onLogout }) {
             console.log("AI message --->", aiMessage);
             setMessages(prev => [...prev, aiMessage]);
             // In handleSend after getting reply:
-if (currentSession.title === 'New Chat') {
-  setCurrentSession(prev => ({ ...prev, title: text.slice(0, 30) }));
-  setRefreshSidebar(prev => prev + 1); // triggers sidebar reload
-}
+            if (currentSession.title === 'New Chat') {
+                setCurrentSession(prev => ({ ...prev, title: text.slice(0, 30) }));
+                setRefreshSidebar(prev => prev + 1); // triggers sidebar reload
+            }
         } catch (error) {
             console.error("catched error -->", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+
+    const handleClearChat = async () => {
+        if (!currentSession) return;
+        if (!window.confirm('Clear all messages in this chat?')) return;
+
+        try {
+            await axios.delete(
+                `http://localhost:5001/api/sessions/${currentSession.id}/messages`,
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            setMessages([]);
+        } catch (error) {
+            console.error('Failed to clear chat:', error);
         }
     };
 
@@ -93,14 +104,18 @@ if (currentSession.title === 'New Chat') {
                     currentSession={currentSession}
                     onSelectSession={setCurrentSession}
                     onNewChat={setCurrentSession}
-                      refreshSidebar={refreshSidebar}
+                    refreshSidebar={refreshSidebar}
                 />
 
                 <div className="chat-wrapper">
                     <div className="chat-header">
                         <h1>{currentSession ? currentSession.title : 'AI Chat'}</h1>
                         <div className="header-right">
-                            <span className="username">👤 {user.username}</span>
+                            {currentSession && (
+                                <button className="clear-btn" onClick={handleClearChat}>
+                                    🗑️ Clear
+                                </button>
+                            )}
                             <button className="toggle-theme" onClick={toggleTheme}>
                                 {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
                             </button>
@@ -111,11 +126,11 @@ if (currentSession.title === 'New Chat') {
 
                     </div>
                     <div className="chat-messages">
-                        {/* {!currentSession && (
+                        {!currentSession && (
                             <div className="empty-state">
                                 <h2>Select or create a new chat! 👈</h2>
                             </div>
-                        )} */}
+                        )}
                         {currentSession && messages.length === 0 && (
                             <div className="empty-state">
                                 <h2>How can I help you today?</h2>
